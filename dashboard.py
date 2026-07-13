@@ -39,12 +39,10 @@ def load_streaming_parquet_data(folder_path):
     except Exception:
         return pd.DataFrame()
     
-# 1. Add a loop counter or timestamp generator inside the while loop
 while True:
     try:
         df = load_streaming_parquet_data("output/delta_fraud_alerts")
         
-        # Create a dynamic unique string suffix based on the current millisecond
         iteration_suffix = str(int(time.time() * 1000))
 
         with placeholder.container():
@@ -64,7 +62,7 @@ while True:
                 kpi3.metric(label="Data Quality Anomalies", value=failed_checks_count)
 
                 # Chart 1 - Real-Time Fraud Burst Volume Over Time
-                pd_stream.subheader("📈 Fraud Alert Velocity Timeline")
+                pd_stream.subheader("Fraud Alert Velocity Timeline")
                 timeline_df = clean_df.sort_values(by="alert_triggered_at")
                 fig_timeline = px.line(
                     timeline_df,
@@ -75,7 +73,6 @@ while True:
                     markers=True
                 )
                 
-                # FIX 1: Append the dynamic suffix to the line chart key
                 pd_stream.plotly_chart(
                     fig_timeline, 
                     use_container_width=True, 
@@ -85,10 +82,9 @@ while True:
                 col1, col2 = pd_stream.columns(2)
 
                 with col1:
-                    pd_stream.subheader("📊 Alerts Share by Asset")
+                    pd_stream.subheader("Alerts Share by Asset")
                     pie_fig = px.pie(clean_df, names='card_number', values='transaction_count', hole=0.4)
                     
-                    # FIX 2: Append the dynamic suffix to the pie chart key
                     pd_stream.plotly_chart(
                         pie_fig, 
                         use_container_width=True, 
@@ -96,7 +92,7 @@ while True:
                     )
                 
                 with col2:
-                    pd_stream.subheader("🗂 Recent Log Commits")
+                    pd_stream.subheader("Recent Log Commits")
                     pd_stream.dataframe(clean_df.tail(10)[['alert_window_start', 'card_number', 'transaction_count']], use_container_width=True)
 
     except Exception as e:
