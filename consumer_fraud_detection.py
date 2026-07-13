@@ -1,12 +1,11 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col, window, count, expr
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType
-from pyspark import __version__ as spark_version
 
 spark = SparkSession.builder \
     .appName("FintechFraudDetector") \
-    .config("spark.jars.packages",
-            f"org.apache.spark:spark-sql-kafka-0-10_2.13:{spark_version}") \
+    .config("spark.jars.packages", 
+            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1") \
     .config("spark.sql.shuffle.partitions", "4") \
     .getOrCreate()
 
@@ -54,8 +53,9 @@ fraud_alerts_df = deduplicated_df \
 
 # appending the alerts to Local Delta Storage And Console
 query = fraud_alerts_df.writeStream \
-    .format("console") \
-    .outputMode("complete") \
-    .start()
+    .format("parquet") \
+    .outputMode("append") \
+    .option("checkpointLocation", "output/checkpoints") \
+    .start("output/delta_fraud_alerts")
 
 query.awaitTermination()
