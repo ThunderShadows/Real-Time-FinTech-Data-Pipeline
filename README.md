@@ -1,8 +1,8 @@
-## Fintech Real-Time Fraud Detection Pipeline
+# Fintech Real-Time Fraud Detection Pipeline
 
 To simulate enterpise-grade data engineering, I wanted to build a highly scalable real-time pipeline capable of handling thousands of financial transactions per second. The core challenge invovled working with high-velocity data feeds where network-induced transaction retries caused duplicate submissions, and poor cellular connectivity introduced significant late-arriving event data. 
 
-# Objective -
+## Objective -
 
 1. Ingest thousands of real-time financial transaction records per second from a live public exchange feed (coinbase.com)
 
@@ -14,7 +14,7 @@ To simulate enterpise-grade data engineering, I wanted to build a highly scalabl
 
 5. Persist data with fault-tolerant checkpointing and visualize the alerts dynamically.
 
-# Method of Approach - 
+## Method of Approach - 
 
 I orchestrated a decoupled architecture locally using Docker Compose to run single-node Apache Kafka and Apache Spark 3.5.1
 
@@ -32,9 +32,11 @@ I orchestrated a decoupled architecture locally using Docker Compose to run sing
 
 6. Observability And Analytics - Built an automated polling dashboard using Streamlit and Plotly that combines the parquet output in real-time, executing basic data validation steps while plotting live threat visual metrics.
 
-# Final Result -
+## Final Result -
 
 The pipeline successfully absorbed and processed rapid micro-batches under high-volume load conditions, capturing extreme transaction events (example - over 400 trade velocity instances per minute for high-activity assets like BTC-USD).
 
 Also with a state-store memory bounds and fault-tolerance through watermark data purges and file checkpointing. (without compromising on transactional tracking logs).
 
+![Dashboard Screenshot1](/home/sumanth/Pictures/Screenshots/Screenshot from 2026-07-14 13-12-44.png)
+![Dashboard Screenshot2](/home/sumanth/Pictures/Screenshots/Screenshot from 2026-07-14 13-12-59.png)
