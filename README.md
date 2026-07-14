@@ -38,5 +38,6 @@ The pipeline successfully absorbed and processed rapid micro-batches under high-
 
 Also with a state-store memory bounds and fault-tolerance through watermark data purges and file checkpointing. (without compromising on transactional tracking logs).
 
-![Dashboard Screenshot1](/home/sumanth/Pictures/Screenshots/Screenshot from 2026-07-14 13-12-44.png)
-![Dashboard Screenshot2](/home/sumanth/Pictures/Screenshots/Screenshot from 2026-07-14 13-12-59.png)
+<img width="1681" height="858" alt="Screenshot from 2026-07-14 13-12-44" src="https://github.com/user-attachments/assets/74baac50-f9b4-4fc8-8914-b025ae46a6f3" />
+
+<img width="1681" height="604" alt="Screenshot from 2026-07-14 13-12-59" src="https://github.com/user-attachments/assets/e5f29ca8-e6a9-4779-ac3b-9a03ca262567" />
