@@ -5,6 +5,7 @@ import os
 import time
 import glob
 from datetime import datetime  
+import numpy as np
 
 pd_stream.set_page_config(page_title="Fintech Real-Time Fraud Monitor ", layout="wide")
 pd_stream.title("Fintech Real-Time Fraud Detection Dashboard")
@@ -15,11 +16,16 @@ placeholder = pd_stream.empty()
 def load_streaming_parquet_data(folder_path):
     # 1. Fallback UI Mock Logic for Cloud Deployments or empty directory starts
     if not os.path.exists(folder_path):
+        now = datetime.utcnow()
         mock_data = {
             'alert_window_start': [datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") for _ in range(5)],
             'card_number': ['BTC-USD', 'ETH-USD', 'SOL-USD', 'BTC-USD', 'ADA-USD'],
-            'transaction_count': [420, 222, 101, 343, 7],
-            'alert_triggered_at': [datetime.utcnow() for _ in range(5)]
+            'transaction_count': [np.random.randint(100, 500),
+                                  np.random.randint(50, 300),
+                                  np.random.randint(10, 150),
+                                  np.random.randint(200, 600),
+                                  np.random.randint(1, 15)],
+            'alert_triggered_at': [now for _ in range(5)]
         }
         return pd.DataFrame(mock_data)
     
