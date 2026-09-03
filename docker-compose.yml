@@ -1,7 +1,12 @@
-version: '3.8'
-
 services:
-  # APACHE KAFKA 
+  # APACHE KAFKA
+  # Dual-listener setup: EXTERNAL is reachable from the host (producer.py,
+  # read_results.py, dashboard.py, pytest); INTERNAL is reachable only from
+  # other containers on the compose network, by service name ("kafka:29092").
+  # The INTERNAL listener is what lets consumer_fraud_detection.py, once
+  # submitted to the Spark cluster below, actually reach Kafka - the old
+  # single-listener setup only ever advertised "localhost", which containers
+  # can't resolve to each other.
   kafka:
     image: apache/kafka:latest
     container_name: kafka_local
@@ -10,14 +15,22 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+      KAFKA_LISTENERS: 'EXTERNAL://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'EXTERNAL://localhost:9092,INTERNAL://kafka:29092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
 
-  # APACHE SPARK MASTER 
+  # APACHE SPARK MASTER
+  # /opt/spark-apps is a bind mount of the repo root. This is both how the
+  # consumer job's code reaches the cluster (submitted via
+  # `docker compose exec spark-master spark-submit ... /opt/spark-apps/consumer_fraud_detection.py`,
+  # see README.md "Setup & Run") and how its Parquet/checkpoint output
+  # becomes visible back on the host at ./output - it's the same physical
+  # directory, not a copy.
   spark-master:
     image: bitnamilegacy/spark:3.5.2
     container_name: spark_master_local
@@ -26,8 +39,17 @@ services:
     ports:
       - "8080:8080"
       - "7077:7077"
+    volumes:
+      - .:/opt/spark-apps
 
   # APACHE SPARK WORKER
+  # Must mount the identical path as spark-master: the worker's executor -
+  # not the master/driver - is what actually performs the Parquet writes and
+  # the windowed-aggregation state-store I/O, so both containers need to see
+  # the same ./output directory or the host never sees any results.
+  # NOTE: this only stays correct with exactly one worker. Local-filesystem
+  # checkpointing does not support multiple workers sharing state - see
+  # README.md "Known Limitations" before scaling replicas.
   spark-worker:
     image: bitnamilegacy/spark:3.5.2
     container_name: spark_worker_local
@@ -40,3 +62,5 @@ services:
       - "8081:8081"
     depends_on:
       - spark-master
+    volumes:
+      - .:/opt/spark-apps

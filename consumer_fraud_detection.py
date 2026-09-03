@@ -4,8 +4,8 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType, T
 
 spark = SparkSession.builder \
     .appName("FintechFraudDetector") \
-    .config("spark.jars.packages", 
-            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1") \
+    .config("spark.jars.packages",
+            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.2") \
     .config("spark.sql.shuffle.partitions", "4") \
     .getOrCreate()
 
